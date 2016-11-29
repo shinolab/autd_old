@@ -3,6 +3,9 @@
 This repository contains driver softwares of Airborne Ultrasound Tactile Display (AUTD).
 [日本語README](README_ja.md)
 
+Please see here for the details of this technology, which we have developed since 2008.
+http://www.hapis.k.u-tokyo.ac.jp/?page_id=447&lang=en
+
 ## Getting Hardware
 
 ### Compatible Device Suppliers
@@ -74,3 +77,11 @@ If you use this SDK in your research please consider to include the following ci
 ## Contributing
 
 We always appreciate your bug reports, suggestions and pull requests. If you are interested in improving firmwares on CPU and FPGA, please let me know and will invite you to our internal repository.
+
+## Links
+
+Lab: 
+http://www.hapis.k.u-tokyo.ac.jp
+
+Youtube Channel:
+https://www.youtube.com/user/ShinodaLab
