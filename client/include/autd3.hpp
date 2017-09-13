@@ -61,7 +61,7 @@ namespace autd {
         ~Geometry();
         static GeometryPtr Create();
         /*!
-            @brief Add new device with position and rotation. Note that the transform is done with order: Translate -> Rotate
+            @brief Add new device with position and rotation. Note that the transform is done with order: Rotate -> Translate
             @param position Position of transducer #0, which is the one at the lower right corner.
             @param euler_angles ZYZ convention Euler angle of the device. 
             @return an id of added device, which is used to delete or do other device specific controls.
