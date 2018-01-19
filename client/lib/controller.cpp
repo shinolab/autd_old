@@ -92,6 +92,9 @@ void autd::Controller::impl::InitPipeline() {
     this->_send_thr = std::thread([&] {
         try {
             while (this->isOpen()) {
+#ifdef DEBUG
+				auto start = std::chrono::steady_clock::now();
+#endif
                 GainPtr gain;
                 ModulationPtr mod;
 
@@ -106,17 +109,11 @@ void autd::Controller::impl::InitPipeline() {
                     if (_send_mod_q.size())
                         mod = _send_mod_q.front();
                 }
-#ifdef DEBUG
-                auto start = std::chrono::steady_clock::now();
-#endif
 
                 size_t body_size = 0;
                 std::unique_ptr<uint8_t[]> body = MakeBody(gain, mod, &body_size);
                 if (this->_link->isOpen()) this->_link->Send(body_size, std::move(body));
-#ifdef DEBUG
-                auto end = std::chrono::steady_clock::now();
-                std::cout << std::chrono::duration <double, std::milli> (end-start).count() << " ms" << std::endl;
-#endif
+
                 // remove elements
                 std::unique_lock<std::mutex> lk(_send_mtx);
                 if (gain.get() != nullptr)
@@ -125,8 +122,10 @@ void autd::Controller::impl::InitPipeline() {
                     mod->sent = 0;
                     _send_mod_q.pop();
                 }
-
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+#ifdef DEBUG
+				auto end = std::chrono::steady_clock::now();
+				std::cout << std::chrono::duration <double, std::micro>(end - start).count() << " us" << std::endl;
+#endif
             }
         } catch (int errnum) {
             this->Close();
@@ -170,7 +169,6 @@ void autd::Controller::impl::AppendModulationSync(const autd::ModulationPtr mod)
                 size_t body_size = 0;
                 std::unique_ptr<uint8_t[]> body = this->MakeBody(autd::GainPtr(nullptr), mod, &body_size);
                 this->_link->Send(body_size, std::move(body));
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
             mod->sent = 0;
         }

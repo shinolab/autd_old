@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Xml;
 using TCatSysManagerLib;
@@ -77,6 +77,7 @@ namespace AUTDServer
                 }
                 Console.WriteLine("Scanning Devices...");
                 List<ITcSmTreeItem> autds = ScanAUTDs(sysManager);
+                AssignCPUCores(sysManager);
                 SetupTask(sysManager, autds);
                 Console.WriteLine("Activating and Restarting TwinCAT3...");
                 sysManager.ActivateConfiguration();
@@ -328,7 +329,7 @@ namespace AUTDServer
             doc.LoadXml(xml);
 
             // set cycle: 1ms
-            doc.SelectSingleNode("TreeItem/TaskDef/CycleTime").InnerText = "10000";
+            doc.SelectSingleNode("TreeItem/TaskDef/CycleTime").InnerText = "5000";
             task1.ConsumeXml(doc.OuterXml);
 
             ITcSmTreeItem task1out = sysManager.LookupTreeItem("TIRT^Task 1^Outputs");
@@ -364,6 +365,73 @@ namespace AUTDServer
                 }
             }
 
+        }
+
+        [Flags()]
+        public enum CpuAffinity : ulong
+        {
+            CPU1 = 0x0000000000000001,
+            CPU2 = 0x0000000000000002,
+            CPU3 = 0x0000000000000004,
+            CPU4 = 0x0000000000000008,
+            CPU5 = 0x0000000000000010,
+            CPU6 = 0x0000000000000020,
+            CPU7 = 0x0000000000000040,
+            CPU8 = 0x0000000000000080,
+            None = 0x0000000000000000,
+            MaskSingle = CPU1,
+            MaskDual = CPU1 | CPU2,
+            MaskQuad = MaskDual | CPU3 | CPU4,
+            MaskHexa = MaskQuad | CPU5 | CPU6,
+            MaskOct = MaskHexa | CPU7 | CPU8,
+            MaskAll = 0xFFFFFFFFFFFFFFFF
+        }
+        static public void AssignCPUCores(ITcSysManager sysManager)
+        {
+            ITcSmTreeItem realtimeSettings = sysManager.LookupTreeItem("TIRS");
+            // CPU Settings
+            // <TreeItem>
+            // <RTimeSetDef>
+            // <MaxCPUs>3</MaxCPUs>
+            // <Affinity>#x0000000000000007</Affinity>
+            // <CPUs>
+            // <CPU id="0">
+            // <LoadLimit>10</LoadLimit>
+            // <BaseTime>10000</BaseTime>
+            // <LatencyWarning>200</LatencyWarning>
+            // </CPU>
+            // </CPUs>
+            // </RTimeSetDef>
+            // </TreeItem> 
+            string xml = null;
+            MemoryStream stream = new MemoryStream();
+            StringWriter stringWriter = new StringWriter();
+            using (XmlWriter writer = XmlTextWriter.Create(stringWriter))
+            {
+                writer.WriteStartElement("TreeItem");
+                writer.WriteStartElement("RTimeSetDef");
+                writer.WriteElementString("MaxCPUs", "1");
+                //string affinityString = string.Format("#x{0}", ((ulong)
+                //cpuAffinity.MaskQuad).ToString("x16"));
+                //writer.WriteElementString("Affinity", affinityString);
+                writer.WriteStartElement("CPUs");
+                writeCpuProperties(writer, 0, 5000);
+                writer.WriteEndElement();     // CPUs     
+                writer.WriteEndElement();     // RTimeSetDef     
+                writer.WriteEndElement();     // TreeItem
+            }
+            xml = stringWriter.ToString();
+            realtimeSettings.ConsumeXml(xml);
+        }
+
+        static private void writeCpuProperties(XmlWriter writer, int id, /*int loadLimit, */int baseTime/*, int latencyWarning*/)
+        {
+            writer.WriteStartElement("CPU");
+            writer.WriteAttributeString("id", id.ToString());
+            //writer.WriteElementString("LoadLimit", loadLimit.ToString());
+            writer.WriteElementString("BaseTime", baseTime.ToString());
+            //writer.WriteElementString("LatencyWarning", latencyWarning.ToString());
+            writer.WriteEndElement();
         }
     }
 
