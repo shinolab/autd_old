@@ -16,6 +16,8 @@
 #include "autd3.hpp"
 #include <boost/random.hpp>
 #include <Eigen/Eigen>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #define REPEAT_SDP (10)
 #define LAMBDA_SDP (0.8)
