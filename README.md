@@ -1,4 +1,6 @@
-# autd
+# autd (old)
+
+**This repository is old and deprecated. Please use [new version.](https://github.com/shinolab/autd3-library-software)**
 
 This repository contains driver softwares of Airborne Ultrasound Tactile Display (AUTD).
 [日本語README](README_ja.md)

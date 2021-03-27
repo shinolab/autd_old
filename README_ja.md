@@ -1,4 +1,6 @@
-﻿# autd3
+﻿# autd3 (old)
+
+**このリポジトリは古くなってます. [最新版](https://github.com/shinolab/autd3-library-software)を使用してください.**
 
 空中超音波触覚ディスプレイ(AUTD) バージョン3ドライバの開発レポジトリです.
 
